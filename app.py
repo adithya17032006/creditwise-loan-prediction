@@ -1,46 +1,124 @@
+```python
 import streamlit as st
 import pandas as pd
 import pickle
 
-# Load model and scaler
+# Page Config
+st.set_page_config(
+    page_title="CreditWise Loan Prediction",
+    page_icon="🏦",
+    layout="wide"
+)
+
+# Load Model and Scaler
 with open("loan_model.pkl", "rb") as f:
     model = pickle.load(f)
 
 with open("scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
 
-st.set_page_config(
-    page_title="CreditWise Loan Approval Prediction",
-    page_icon="🏦"
-)
-
+# Header
 st.title("🏦 CreditWise Loan Approval Prediction")
-st.write("Enter applicant details to predict loan approval.")
 
+st.markdown("""
+Predict whether a loan application is likely to be approved using Machine Learning.
+""")
+
+# Sidebar
+st.sidebar.title("🏦 CreditWise")
+
+st.sidebar.info(
+    """
+    ### Loan Approval Predictor
+
+    Enter applicant details and get an instant prediction.
+
+    **Model:** Logistic Regression
+    **Accuracy:** 87.5%
+    """
+)
+
+# -------------------------
 # Numeric Inputs
-Applicant_Income = st.number_input("Applicant Income", min_value=0.0)
-Coapplicant_Income = st.number_input("Coapplicant Income", min_value=0.0)
-Age = st.number_input("Age", min_value=18)
-Dependents = st.number_input("Dependents", min_value=0)
-Credit_Score = st.number_input(
-    "Credit Score",
-    min_value=300.0,
-    max_value=900.0,
-    value=650.0
-)
-Existing_Loans = st.number_input("Existing Loans", min_value=0)
-DTI_Ratio = st.number_input(
-    "DTI Ratio",
-    min_value=0.0,
-    max_value=2.0,
-    value=0.30
-)
-Savings = st.number_input("Savings", min_value=0.0)
-Collateral_Value = st.number_input("Collateral Value", min_value=0.0)
-Loan_Amount = st.number_input("Loan Amount", min_value=0.0)
-Loan_Term = st.number_input("Loan Term (Months)", min_value=1)
+# -------------------------
 
+col1, col2 = st.columns(2)
+
+with col1:
+    Applicant_Income = st.number_input(
+        "Applicant Income",
+        min_value=0.0,
+        value=10000.0
+    )
+
+    Coapplicant_Income = st.number_input(
+        "Coapplicant Income",
+        min_value=0.0,
+        value=2000.0
+    )
+
+    Age = st.number_input(
+        "Age",
+        min_value=18,
+        value=30
+    )
+
+    Dependents = st.number_input(
+        "Dependents",
+        min_value=0,
+        value=0
+    )
+
+    Credit_Score = st.number_input(
+        "Credit Score",
+        min_value=300.0,
+        max_value=900.0,
+        value=650.0
+    )
+
+with col2:
+
+    Existing_Loans = st.number_input(
+        "Existing Loans",
+        min_value=0,
+        value=0
+    )
+
+    DTI_Ratio = st.number_input(
+        "DTI Ratio",
+        min_value=0.0,
+        max_value=2.0,
+        value=0.30
+    )
+
+    Savings = st.number_input(
+        "Savings",
+        min_value=0.0,
+        value=10000.0
+    )
+
+    Collateral_Value = st.number_input(
+        "Collateral Value",
+        min_value=0.0,
+        value=50000.0
+    )
+
+    Loan_Amount = st.number_input(
+        "Loan Amount",
+        min_value=0.0,
+        value=15000.0
+    )
+
+Loan_Term = st.number_input(
+    "Loan Term (Months)",
+    min_value=1,
+    value=60
+)
+
+# -------------------------
 # Categorical Inputs
+# -------------------------
+
 Education_Level = st.selectbox(
     "Education Level",
     ["Graduate", "Not Graduate"]
@@ -76,9 +154,12 @@ Employer_Category = st.selectbox(
     ["Government", "MNC", "Private", "Unemployed"]
 )
 
-if st.button("Predict"):
+# -------------------------
+# Prediction
+# -------------------------
 
-    # Match notebook encoding
+if st.button("Predict Loan Approval"):
+
     education_encoded = 0 if Education_Level == "Graduate" else 1
     gender_encoded = 1 if Gender == "Male" else 0
 
@@ -147,17 +228,34 @@ if st.button("Predict"):
         "Employer_Category_Unemployed"
     ]
 
+    df = pd.DataFrame([data])
+    df = df[feature_order]
+
     try:
-        df = pd.DataFrame([data])
-        df = df[feature_order]
-
         df_scaled = scaler.transform(df)
-        prediction = model.predict(df_scaled)
 
-        if prediction[0] == 1:
+        prediction = model.predict(df_scaled)[0]
+
+        if hasattr(model, "predict_proba"):
+            probability = model.predict_proba(df_scaled)[0][1]
+
+            st.metric(
+                "Approval Probability",
+                f"{probability * 100:.2f}%"
+            )
+
+        if prediction == 1:
             st.success("✅ Loan Approved")
+            st.balloons()
         else:
             st.error("❌ Loan Rejected")
 
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"Prediction Error: {e}")
+
+st.markdown("---")
+
+st.caption(
+    "Developed by Adithya H S | CreditWise Loan Approval Prediction"
+)
+```
