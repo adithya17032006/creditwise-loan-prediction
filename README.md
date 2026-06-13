@@ -25,5 +25,9 @@ Machine learning project that predicts whether a loan application will be approv
 ## Model Used
 - Gaussian Naive Bayes
 
+## Live Demo
+
+https://creditwise-loan-prediction-kflappro693b9otcku8y7ec.streamlit.app/
+
 ## Results
 Achieved strong performance using feature engineering and preprocessing techniques.
