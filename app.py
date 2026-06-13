@@ -1,6 +1,6 @@
 import streamlit as st
-import pickle
 import pandas as pd
+import pickle
 
 # Load model and scaler
 with open("loan_model.pkl", "rb") as f:
@@ -8,6 +8,8 @@ with open("loan_model.pkl", "rb") as f:
 
 with open("scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
+
+st.set_page_config(page_title="CreditWise Loan Prediction")
 
 st.title("🏦 CreditWise Loan Approval Prediction")
 
@@ -20,19 +22,19 @@ Existing_Loans = st.number_input("Existing Loans", min_value=0)
 Savings = st.number_input("Savings", min_value=0.0)
 Collateral_Value = st.number_input("Collateral Value", min_value=0.0)
 Loan_Amount = st.number_input("Loan Amount", min_value=0.0)
-Loan_Term = st.number_input("Loan Term (Months)", min_value=1)
-Credit_Score = st.number_input("Credit Score", min_value=0.0)
-DTI_Ratio = st.number_input("DTI Ratio", min_value=0.0)
+Loan_Term = st.number_input("Loan Term", min_value=1)
+Credit_Score = st.number_input("Credit Score", min_value=300.0, max_value=900.0, value=650.0)
+DTI_Ratio = st.number_input("DTI Ratio", min_value=0.0, value=0.30)
 
 # Categorical Inputs
 Education_Level = st.selectbox(
     "Education Level",
-    ["Graduate", "High School", "Postgraduate"]
+    ["Graduate", "Not Graduate"]
 )
 
 Gender = st.selectbox(
     "Gender",
-    ["Male", "Female"]
+    ["Female", "Male"]
 )
 
 Employment_Status = st.selectbox(
@@ -62,6 +64,10 @@ Employer_Category = st.selectbox(
 
 if st.button("Predict"):
 
+    # Match notebook encoding
+    education_encoded = 0 if Education_Level == "Graduate" else 1
+    gender_encoded = 1 if Gender == "Male" else 0
+
     data = {
         "Applicant_Income": Applicant_Income,
         "Coapplicant_Income": Coapplicant_Income,
@@ -72,9 +78,8 @@ if st.button("Predict"):
         "Collateral_Value": Collateral_Value,
         "Loan_Amount": Loan_Amount,
         "Loan_Term": Loan_Term,
-
-        "Education_Level": 0 if Education_Level == "Graduate" else 1,
-        "Gender": 1 if Gender == "Male" else 0,
+        "Education_Level": education_encoded,
+        "Gender": gender_encoded,
 
         "Employment_Status_Salaried": 1 if Employment_Status == "Salaried" else 0,
         "Employment_Status_Self-employed": 1 if Employment_Status == "Self-employed" else 0,
@@ -130,13 +135,24 @@ if st.button("Predict"):
     ]
 
     df = pd.DataFrame([data])
-    df = df.reindex(columns=feature_order)
+    df = df[feature_order]
 
-    df_scaled = scaler.transform(df)
+    try:
+        df_scaled = scaler.transform(df)
+        prediction = model.predict(df_scaled)
 
-    prediction = model.predict(df_scaled)
+        if prediction[0] == 1:
+            st.success("✅ Loan Approved")
+        else:
+            st.error("❌ Loan Rejected")
 
-    if prediction[0] == 1:
-        st.success("✅ Loan Approved")
-    else:
-        st.error("❌ Loan Rejected")
+    except Exception as e:
+        st.error("Model/Scaler Feature Mismatch")
+        st.write(str(e))
+
+        if hasattr(scaler, "feature_names_in_"):
+            st.write("Scaler expects:")
+            st.write(list(scaler.feature_names_in_))
+
+        st.write("App sends:")
+        st.write(df.columns.tolist())
