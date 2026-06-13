@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import pandas as pd
 import pickle
@@ -20,28 +19,25 @@ with open("scaler.pkl", "rb") as f:
 # Header
 st.title("🏦 CreditWise Loan Approval Prediction")
 
-st.markdown("""
-Predict whether a loan application is likely to be approved using Machine Learning.
-""")
+st.markdown(
+    "Predict whether a loan application is likely to be approved using Machine Learning."
+)
 
 # Sidebar
 st.sidebar.title("🏦 CreditWise")
 
 st.sidebar.info(
     """
-    ### Loan Approval Predictor
+    Loan Approval Predictor
 
     Enter applicant details and get an instant prediction.
 
-    **Model:** Logistic Regression
-    **Accuracy:** 87.5%
+    Model: Logistic Regression
+    Accuracy: 87.5%
     """
 )
 
-# -------------------------
 # Numeric Inputs
-# -------------------------
-
 col1, col2 = st.columns(2)
 
 with col1:
@@ -77,7 +73,6 @@ with col1:
     )
 
 with col2:
-
     Existing_Loans = st.number_input(
         "Existing Loans",
         min_value=0,
@@ -87,7 +82,6 @@ with col2:
     DTI_Ratio = st.number_input(
         "DTI Ratio",
         min_value=0.0,
-        max_value=2.0,
         value=0.30
     )
 
@@ -115,10 +109,7 @@ Loan_Term = st.number_input(
     value=60
 )
 
-# -------------------------
 # Categorical Inputs
-# -------------------------
-
 Education_Level = st.selectbox(
     "Education Level",
     ["Graduate", "Not Graduate"]
@@ -153,10 +144,6 @@ Employer_Category = st.selectbox(
     "Employer Category",
     ["Government", "MNC", "Private", "Unemployed"]
 )
-
-# -------------------------
-# Prediction
-# -------------------------
 
 if st.button("Predict Loan Approval"):
 
@@ -228,10 +215,10 @@ if st.button("Predict Loan Approval"):
         "Employer_Category_Unemployed"
     ]
 
-    df = pd.DataFrame([data])
-    df = df[feature_order]
-
     try:
+        df = pd.DataFrame([data])
+        df = df[feature_order]
+
         df_scaled = scaler.transform(df)
 
         prediction = model.predict(df_scaled)[0]
@@ -258,4 +245,3 @@ st.markdown("---")
 st.caption(
     "Developed by Adithya H S | CreditWise Loan Approval Prediction"
 )
-```
