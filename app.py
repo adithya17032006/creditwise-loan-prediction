@@ -99,9 +99,42 @@ if st.button("Predict"):
         "Credit_Score_sq": Credit_Score ** 2,
     }
 
-    df = pd.DataFrame([data])
+ feature_order = [
+    "Applicant_Income",
+    "Coapplicant_Income",
+    "Age",
+    "Dependents",
+    "Existing_Loans",
+    "Savings",
+    "Collateral_Value",
+    "Loan_Amount",
+    "Loan_Term",
+    "Education_Level",
+    "Gender",
+    "Employment_Status_Salaried",
+    "Employment_Status_Self-employed",
+    "Employment_Status_Unemployed",
+    "Marital_Status_Single",
+    "Loan_Purpose_Car",
+    "Loan_Purpose_Education",
+    "Loan_Purpose_Home",
+    "Loan_Purpose_Personal",
+    "Property_Area_Semiurban",
+    "Property_Area_Urban",
+    "Employer_Category_Government",
+    "Employer_Category_MNC",
+    "Employer_Category_Private",
+    "Employer_Category_Unemployed",
+    "DTI_Ratio_sq",
+    "Credit_Score_sq"
+]
 
-    df_scaled = scaler.transform(df)
+df = pd.DataFrame([data])
+
+# Force exact column order
+df = df.reindex(columns=feature_order)
+
+df_scaled = scaler.transform(df)
 
     prediction = model.predict(df_scaled)
 
