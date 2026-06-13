@@ -73,7 +73,7 @@ if st.button("Predict"):
         "Loan_Amount": Loan_Amount,
         "Loan_Term": Loan_Term,
 
-        "Education_Level": 1 if Education_Level == "Graduate" else 0,
+        "Education_Level": 0 if Education_Level == "Graduate" else 1,
         "Gender": 1 if Gender == "Male" else 0,
 
         "Employment_Status_Salaried": 1 if Employment_Status == "Salaried" else 0,
@@ -99,42 +99,40 @@ if st.button("Predict"):
         "Credit_Score_sq": Credit_Score ** 2,
     }
 
- feature_order = [
-    "Applicant_Income",
-    "Coapplicant_Income",
-    "Age",
-    "Dependents",
-    "Existing_Loans",
-    "Savings",
-    "Collateral_Value",
-    "Loan_Amount",
-    "Loan_Term",
-    "Education_Level",
-    "Gender",
-    "Employment_Status_Salaried",
-    "Employment_Status_Self-employed",
-    "Employment_Status_Unemployed",
-    "Marital_Status_Single",
-    "Loan_Purpose_Car",
-    "Loan_Purpose_Education",
-    "Loan_Purpose_Home",
-    "Loan_Purpose_Personal",
-    "Property_Area_Semiurban",
-    "Property_Area_Urban",
-    "Employer_Category_Government",
-    "Employer_Category_MNC",
-    "Employer_Category_Private",
-    "Employer_Category_Unemployed",
-    "DTI_Ratio_sq",
-    "Credit_Score_sq"
-]
+    feature_order = [
+        "Applicant_Income",
+        "Coapplicant_Income",
+        "Age",
+        "Dependents",
+        "Existing_Loans",
+        "Savings",
+        "Collateral_Value",
+        "Loan_Amount",
+        "Loan_Term",
+        "Education_Level",
+        "Gender",
+        "Employment_Status_Salaried",
+        "Employment_Status_Self-employed",
+        "Employment_Status_Unemployed",
+        "Marital_Status_Single",
+        "Loan_Purpose_Car",
+        "Loan_Purpose_Education",
+        "Loan_Purpose_Home",
+        "Loan_Purpose_Personal",
+        "Property_Area_Semiurban",
+        "Property_Area_Urban",
+        "Employer_Category_Government",
+        "Employer_Category_MNC",
+        "Employer_Category_Private",
+        "Employer_Category_Unemployed",
+        "DTI_Ratio_sq",
+        "Credit_Score_sq"
+    ]
 
-df = pd.DataFrame([data])
+    df = pd.DataFrame([data])
+    df = df.reindex(columns=feature_order)
 
-# Force exact column order
-df = df.reindex(columns=feature_order)
-
-df_scaled = scaler.transform(df)
+    df_scaled = scaler.transform(df)
 
     prediction = model.predict(df_scaled)
 
