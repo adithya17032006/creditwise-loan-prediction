@@ -9,22 +9,36 @@ with open("loan_model.pkl", "rb") as f:
 with open("scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
 
-st.set_page_config(page_title="CreditWise Loan Prediction")
+st.set_page_config(
+    page_title="CreditWise Loan Approval Prediction",
+    page_icon="🏦"
+)
 
 st.title("🏦 CreditWise Loan Approval Prediction")
+st.write("Enter applicant details to predict loan approval.")
 
 # Numeric Inputs
 Applicant_Income = st.number_input("Applicant Income", min_value=0.0)
 Coapplicant_Income = st.number_input("Coapplicant Income", min_value=0.0)
 Age = st.number_input("Age", min_value=18)
 Dependents = st.number_input("Dependents", min_value=0)
+Credit_Score = st.number_input(
+    "Credit Score",
+    min_value=300.0,
+    max_value=900.0,
+    value=650.0
+)
 Existing_Loans = st.number_input("Existing Loans", min_value=0)
+DTI_Ratio = st.number_input(
+    "DTI Ratio",
+    min_value=0.0,
+    max_value=2.0,
+    value=0.30
+)
 Savings = st.number_input("Savings", min_value=0.0)
 Collateral_Value = st.number_input("Collateral Value", min_value=0.0)
 Loan_Amount = st.number_input("Loan Amount", min_value=0.0)
-Loan_Term = st.number_input("Loan Term", min_value=1)
-Credit_Score = st.number_input("Credit Score", min_value=300.0, max_value=900.0, value=650.0)
-DTI_Ratio = st.number_input("DTI Ratio", min_value=0.0, value=0.30)
+Loan_Term = st.number_input("Loan Term (Months)", min_value=1)
 
 # Categorical Inputs
 Education_Level = st.selectbox(
@@ -73,7 +87,9 @@ if st.button("Predict"):
         "Coapplicant_Income": Coapplicant_Income,
         "Age": Age,
         "Dependents": Dependents,
+        "Credit_Score": Credit_Score,
         "Existing_Loans": Existing_Loans,
+        "DTI_Ratio": DTI_Ratio,
         "Savings": Savings,
         "Collateral_Value": Collateral_Value,
         "Loan_Amount": Loan_Amount,
@@ -99,9 +115,6 @@ if st.button("Predict"):
         "Employer_Category_MNC": 1 if Employer_Category == "MNC" else 0,
         "Employer_Category_Private": 1 if Employer_Category == "Private" else 0,
         "Employer_Category_Unemployed": 1 if Employer_Category == "Unemployed" else 0,
-
-        "DTI_Ratio_sq": DTI_Ratio ** 2,
-        "Credit_Score_sq": Credit_Score ** 2,
     }
 
     feature_order = [
@@ -109,7 +122,9 @@ if st.button("Predict"):
         "Coapplicant_Income",
         "Age",
         "Dependents",
+        "Credit_Score",
         "Existing_Loans",
+        "DTI_Ratio",
         "Savings",
         "Collateral_Value",
         "Loan_Amount",
@@ -129,15 +144,13 @@ if st.button("Predict"):
         "Employer_Category_Government",
         "Employer_Category_MNC",
         "Employer_Category_Private",
-        "Employer_Category_Unemployed",
-        "DTI_Ratio_sq",
-        "Credit_Score_sq"
+        "Employer_Category_Unemployed"
     ]
 
-    df = pd.DataFrame([data])
-    df = df[feature_order]
-
     try:
+        df = pd.DataFrame([data])
+        df = df[feature_order]
+
         df_scaled = scaler.transform(df)
         prediction = model.predict(df_scaled)
 
@@ -147,12 +160,4 @@ if st.button("Predict"):
             st.error("❌ Loan Rejected")
 
     except Exception as e:
-        st.error("Model/Scaler Feature Mismatch")
-        st.write(str(e))
-
-        if hasattr(scaler, "feature_names_in_"):
-            st.write("Scaler expects:")
-            st.write(list(scaler.feature_names_in_))
-
-        st.write("App sends:")
-        st.write(df.columns.tolist())
+        st.error(f"Error: {e}")
